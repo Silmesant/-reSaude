@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_18_221108) do
+ActiveRecord::Schema.define(version: 2020_10_18_224506) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -27,21 +27,30 @@ ActiveRecord::Schema.define(version: 2020_10_18_221108) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "consultation_exams", force: :cascade do |t|
+    t.bigint "consultation_id", null: false
+    t.bigint "exam_id", null: false
+    t.string "body_part"
+    t.bigint "address_id", null: false
+    t.date "date"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["address_id"], name: "index_consultation_exams_on_address_id"
+    t.index ["consultation_id"], name: "index_consultation_exams_on_consultation_id"
+    t.index ["exam_id"], name: "index_consultation_exams_on_exam_id"
+  end
+
   create_table "consultations", force: :cascade do |t|
     t.date "date"
     t.bigint "user_id", null: false
     t.bigint "doctor_id", null: false
     t.bigint "address_id", null: false
-    t.bigint "exam_id", null: false
-    t.bigint "health_problem_id", null: false
     t.string "symptoms"
     t.boolean "routine"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["address_id"], name: "index_consultations_on_address_id"
     t.index ["doctor_id"], name: "index_consultations_on_doctor_id"
-    t.index ["exam_id"], name: "index_consultations_on_exam_id"
-    t.index ["health_problem_id"], name: "index_consultations_on_health_problem_id"
     t.index ["user_id"], name: "index_consultations_on_user_id"
   end
 
@@ -56,22 +65,18 @@ ActiveRecord::Schema.define(version: 2020_10_18_221108) do
 
   create_table "exams", force: :cascade do |t|
     t.string "name"
-    t.string "body_part"
-    t.string "laboratory_name"
-    t.bigint "address_id", null: false
-    t.date "date"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["address_id"], name: "index_exams_on_address_id"
   end
 
   create_table "health_problems", force: :cascade do |t|
     t.string "name"
     t.string "fase"
-    t.string "diagnostic_date"
     t.text "details"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "consultation_id", null: false
+    t.index ["consultation_id"], name: "index_health_problems_on_consultation_id"
   end
 
   create_table "hospitalizations", force: :cascade do |t|
@@ -120,12 +125,13 @@ ActiveRecord::Schema.define(version: 2020_10_18_221108) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "consultation_exams", "addresses"
+  add_foreign_key "consultation_exams", "consultations"
+  add_foreign_key "consultation_exams", "exams"
   add_foreign_key "consultations", "addresses"
   add_foreign_key "consultations", "doctors"
-  add_foreign_key "consultations", "exams"
-  add_foreign_key "consultations", "health_problems"
   add_foreign_key "consultations", "users"
-  add_foreign_key "exams", "addresses"
+  add_foreign_key "health_problems", "consultations"
   add_foreign_key "hospitalizations", "addresses"
   add_foreign_key "hospitalizations", "health_problems"
   add_foreign_key "treatments", "consultations"
