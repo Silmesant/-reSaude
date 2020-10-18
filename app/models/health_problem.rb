@@ -1,0 +1,2 @@
+class HealthProblem < ApplicationRecord
+end
